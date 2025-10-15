@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.perrystreet.nobigviewmodels.domain.usecase.GetMediaUseCase
 import com.perrystreet.nobigviewmodels.presentation.grid.mapper.GridMediaUiModelMapper
+import com.perrystreet.nobigviewmodels.presentation.grid.mediator.GridAction
 import com.perrystreet.nobigviewmodels.presentation.grid.mediator.GridMediator
 import com.perrystreet.nobigviewmodels.presentation.grid.model.GridState
 import kotlinx.coroutines.Dispatchers
@@ -20,18 +21,22 @@ class GridViewModel(
     val state: StateFlow<GridState> = gridMediator.state
 
     init {
+        loadMedia()
+    }
+
+    private fun loadMedia() {
         viewModelScope.launch(Dispatchers.Main) {
             getMediaUseCase()
                 .map {
-                    GridState(GridMediaUiModelMapper.fromMediaList(it))
-                }.collect { newState ->
-                    gridMediator.updateState(newState)
+                    GridMediaUiModelMapper.fromMediaList(it)
+                }.collect { uiModels ->
+                    gridMediator.dispatch(GridAction.MediaLoaded(uiModels))
                 }
         }
     }
 
     fun onMediaLongTap(mediaId: String) {
-        gridMediator.toggleSelection(mediaId)
+        gridMediator.dispatch(GridAction.ToggleSelection(mediaId))
     }
 }
 

@@ -10,5 +10,6 @@ data class GridMediaUiModel(
     val formattedDate: String,
     val typeIcon: String,
     val typeColor: Color,
-    val selected: Boolean = false
+    val selected: Boolean = false,
+    val isDeleting: Boolean = false,
 )

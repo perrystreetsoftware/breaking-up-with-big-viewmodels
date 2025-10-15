@@ -23,21 +23,21 @@ class TopBarViewModelTest : BaseBehaviorSpec() {
             val topBarViewModel: TopBarViewModel = gridScope.get()
 
             Then("The top bar does not show any selected items") {
-                topBarViewModel.selectedCount.first() shouldBe 0
+                topBarViewModel.state.first().selectedCount shouldBe 0
             }
 
             When("I long tap on a media item") {
                 gridViewModel.onMediaLongTap("id1")
 
                 Then("The top bar shows 1 selected item") {
-                    topBarViewModel.selectedCount.first() shouldBe 1
+                    topBarViewModel.state.first().selectedCount shouldBe 1
                 }
 
                 And("I long tap on another media item") {
                     gridViewModel.onMediaLongTap("id2")
 
                     Then("The top bar shows 2 selected items") {
-                        topBarViewModel.selectedCount.first() shouldBe 2
+                        topBarViewModel.state.first().selectedCount shouldBe 2
                     }
 
                     And("I long tap again on the same media items") {
@@ -45,7 +45,7 @@ class TopBarViewModelTest : BaseBehaviorSpec() {
                         gridViewModel.onMediaLongTap("id2")
 
                         Then("The top bar does not show any selected items") {
-                            topBarViewModel.selectedCount.first() shouldBe 0
+                            topBarViewModel.state.first().selectedCount shouldBe 0
                         }
                     }
                 }

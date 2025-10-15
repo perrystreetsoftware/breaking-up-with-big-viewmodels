@@ -13,22 +13,87 @@ class GridMediator {
     private val _state = MutableStateFlow(GridState(emptyList()))
     val state: StateFlow<GridState> = _state.asStateFlow()
 
-    fun updateState(newState: GridState) {
+    fun dispatch(action: GridAction) {
+        val currentState = _state.value
+        val newState = reduce(currentState, action)
         _state.value = newState
     }
 
-    fun toggleSelection(mediaId: String) {
-        val currentState = _state.value
-        val updatedMedia =
-            currentState.media.map { media ->
-                if (media.id == mediaId) {
-                    media.copy(selected = !media.selected)
-                } else {
-                    media
-                }
+    private fun reduce(
+        state: GridState,
+        action: GridAction,
+    ): GridState =
+        when (action) {
+            is GridAction.MediaLoaded -> {
+                state.copy(
+                    media = action.media,
+                    isLoading = false,
+                    error = null,
+                )
             }
-        _state.value = currentState.copy(media = updatedMedia)
-    }
+
+            is GridAction.ToggleSelection -> {
+                val updatedMedia =
+                    state.media.map { media ->
+                        if (media.id == action.mediaId) {
+                            media.copy(selected = !media.selected)
+                        } else {
+                            media
+                        }
+                    }
+                state.copy(media = updatedMedia)
+            }
+
+            is GridAction.ClearSelections -> {
+                val updatedMedia =
+                    state.media.map { media ->
+                        media.copy(selected = false)
+                    }
+                state.copy(media = updatedMedia)
+            }
+
+            is GridAction.SelectMultiple -> {
+                val updatedMedia =
+                    state.media.map { media ->
+                        if (action.mediaIds.contains(media.id)) {
+                            media.copy(selected = true)
+                        } else {
+                            media
+                        }
+                    }
+                state.copy(media = updatedMedia)
+            }
+
+            is GridAction.DeletingMedia -> {
+                val updatedMedia =
+                    state.media.map { media ->
+                        if (action.mediaIds.contains(media.id)) {
+                            media.copy(isDeleting = true)
+                        } else {
+                            media
+                        }
+                    }
+                state.copy(
+                    media = updatedMedia,
+                    error = null,
+                )
+            }
+
+            is GridAction.DeleteFailed -> {
+                val updatedMedia =
+                    state.media.map { media ->
+                        media.copy(isDeleting = false)
+                    }
+                state.copy(
+                    media = updatedMedia,
+                    error = action.error,
+                )
+            }
+
+            is GridAction.ClearError -> {
+                state.copy(error = null)
+            }
+        }
 }
 
 /** Hilt equivalent */

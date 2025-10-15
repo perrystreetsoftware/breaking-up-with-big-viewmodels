@@ -1,5 +1,8 @@
 package com.perrystreet.nobigviewmodels.presentation.detail.ui
 
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
@@ -39,11 +42,13 @@ import com.perrystreet.nobigviewmodels.presentation.theme.AppTheme
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun MediaDetailScreen(
     mediaId: String,
-    onBackClick: () -> Unit,
+    onBackTap: () -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedVisibilityScope,
 ) {
     val viewModel: MediaDetailViewModel = koinViewModel { parametersOf(mediaId) }
     val media by viewModel.media.collectAsState()
@@ -60,7 +65,7 @@ fun MediaDetailScreen(
                         )
                     },
                     navigationIcon = {
-                        IconButton(onClick = onBackClick) {
+                        IconButton(onClick = onBackTap) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Back",
@@ -92,20 +97,27 @@ fun MediaDetailScreen(
                             shape = RoundedCornerShape(12.dp),
                             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
                         ) {
-                            AsyncImage(
-                                model =
-                                    ImageRequest
-                                        .Builder(LocalContext.current)
-                                        .data(mediaItem.imageUrl)
-                                        .crossfade(true)
-                                        .build(),
-                                contentDescription = mediaItem.title,
-                                modifier =
-                                    Modifier
-                                        .fillMaxSize()
-                                        .clip(RoundedCornerShape(12.dp)),
-                                contentScale = ContentScale.Crop,
-                            )
+                            with(sharedTransitionScope) {
+                                AsyncImage(
+                                    model =
+                                        ImageRequest
+                                            .Builder(LocalContext.current)
+                                            .data(mediaItem.imageUrl)
+                                            .crossfade(true)
+                                            .build(),
+                                    contentDescription = mediaItem.title,
+                                    modifier =
+                                        Modifier
+                                            .fillMaxSize()
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .sharedBounds(
+                                                rememberSharedContentState(key = "media-${mediaItem.id}"),
+                                                animatedVisibilityScope = animatedContentScope,
+                                                clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(12.dp)),
+                                            ),
+                                    contentScale = ContentScale.Crop,
+                                )
+                            }
                         }
 
                         Text(

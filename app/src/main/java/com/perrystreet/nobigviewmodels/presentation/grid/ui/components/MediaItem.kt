@@ -1,5 +1,8 @@
 package com.perrystreet.nobigviewmodels.presentation.grid.ui.components
 
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -15,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -32,12 +36,14 @@ import coil3.request.crossfade
 import com.perrystreet.nobigviewmodels.presentation.grid.model.GridMediaUiModel
 import com.perrystreet.nobigviewmodels.presentation.theme.AppTheme
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun MediaItem(
     media: GridMediaUiModel,
     onLongTap: (String) -> Unit = {},
-    onMediaClick: (String) -> Unit = {},
+    onMediaTap: (String) -> Unit = {},
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedVisibilityScope,
 ) {
     Card(
         modifier =
@@ -45,30 +51,51 @@ fun MediaItem(
                 .fillMaxWidth()
                 .aspectRatio(1f)
                 .combinedClickable(
-                    onClick = { onMediaClick(media.id) },
+                    onClick = { onMediaTap(media.id) },
                     onLongClick = { onLongTap(media.id) },
                 ),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
     ) {
         Box {
-            AsyncImage(
-                model =
-                    ImageRequest
-                        .Builder(LocalContext.current)
-                        .data(media.thumbnailUrl)
-                        .crossfade(true)
-                        .build(),
-                contentDescription = media.title,
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(12.dp)),
-                contentScale = ContentScale.Crop,
-            )
+            with(sharedTransitionScope) {
+                AsyncImage(
+                    model =
+                        ImageRequest
+                            .Builder(LocalContext.current)
+                            .data(media.thumbnailUrl)
+                            .crossfade(true)
+                            .build(),
+                    contentDescription = media.title,
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(12.dp))
+                            .sharedBounds(
+                                rememberSharedContentState(key = "media-${media.id}"),
+                                animatedVisibilityScope = animatedContentScope,
+                                clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(12.dp)),
+                            ),
+                    contentScale = ContentScale.Crop,
+                )
+            }
 
-            // Selection checkbox
-            if (media.selected) {
+            if (media.isDeleting) {
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.6f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(48.dp),
+                    )
+                }
+            }
+
+            if (media.selected && !media.isDeleting) {
                 Box(
                     modifier =
                         Modifier
@@ -93,22 +120,29 @@ fun MediaItem(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Preview(showBackground = true, name = "Single Media Item")
 @Composable
 fun MediaItemPreview() {
     AppTheme {
-        MediaItem(
-            media =
-                GridMediaUiModel(
-                    id = "1",
-                    title = "Beautiful Landscape",
-                    thumbnailUrl = "",
-                    imageUrl = "",
-                    formattedDate = "Sep 15, 2025",
-                    typeIcon = "📷",
-                    typeColor =
-                        Color(0xFF4CAF50),
-                ),
-        )
+        androidx.compose.animation.SharedTransitionLayout {
+            androidx.compose.animation.AnimatedVisibility(visible = true) {
+                MediaItem(
+                    media =
+                        GridMediaUiModel(
+                            id = "1",
+                            title = "Beautiful Landscape",
+                            thumbnailUrl = "",
+                            imageUrl = "",
+                            formattedDate = "Sep 15, 2025",
+                            typeIcon = "📷",
+                            typeColor =
+                                Color(0xFF4CAF50),
+                        ),
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    animatedContentScope = this@AnimatedVisibility,
+                )
+            }
+        }
     }
 }

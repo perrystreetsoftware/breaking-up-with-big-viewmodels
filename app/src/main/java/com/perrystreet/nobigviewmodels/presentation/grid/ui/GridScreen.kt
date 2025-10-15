@@ -1,5 +1,8 @@
 package com.perrystreet.nobigviewmodels.presentation.grid.ui
 
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -7,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import com.perrystreet.nobigviewmodels.presentation.grid.model.TopBarState
 import com.perrystreet.nobigviewmodels.presentation.grid.ui.components.BottomBar
 import com.perrystreet.nobigviewmodels.presentation.grid.ui.components.Grid
 import com.perrystreet.nobigviewmodels.presentation.grid.ui.components.TopBar
@@ -17,24 +21,31 @@ import com.perrystreet.nobigviewmodels.presentation.theme.AppTheme
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.scope.Scope
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun GridScreen(
     scope: Scope,
     onMediaTap: (String) -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedVisibilityScope,
 ) {
     val gridViewModel: GridViewModel = koinViewModel(scope = scope)
     val gridState by gridViewModel.state.collectAsState()
 
     val topBarViewModel: TopBarViewModel = koinViewModel(scope = scope)
-    val selectedCount by topBarViewModel.selectedCount.collectAsState(initial = 0)
+    val topBarState by topBarViewModel.state.collectAsState(initial = TopBarState())
 
     val bottomBarViewModel: BottomBarViewModel = koinViewModel(scope = scope)
     val isBottomBarVisible by bottomBarViewModel.isVisible.collectAsState(initial = false)
 
     AppTheme {
         Scaffold(
-            topBar = { TopBar(selectedCount = selectedCount) },
+            topBar = {
+                TopBar(
+                    state = topBarState,
+                    onDeleteTap = topBarViewModel::onDeleteTap,
+                )
+            },
             bottomBar = {
                 BottomBar(
                     isVisible = isBottomBarVisible,
@@ -50,6 +61,8 @@ fun GridScreen(
                 modifier = Modifier.padding(paddingValues),
                 onLongTap = gridViewModel::onMediaLongTap,
                 onMediaTap = onMediaTap,
+                sharedTransitionScope = sharedTransitionScope,
+                animatedContentScope = animatedContentScope,
             )
         }
     }
