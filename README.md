@@ -2,6 +2,10 @@
 
 This is a sample Android app that demonstrates how to split long ViewModels into smaller ones, using the **Mediator pattern**, and tie them to smaller and distinct parts of the screen.
 
+## 🎥 Check out our droidcon talk!
+
+For more information, watch our droidcon talk [**"Breaking Up with Big ViewModels — Without Breaking Your Architecture"**](https://www.youtube.com/watch?v=R31FAMh2au4)
+
 ## What You'll Learn
 
 - Break a large ViewModel into smaller, independently testable ViewModels, each tied to a smaller component of the screen.
@@ -31,7 +35,3 @@ This is a sample Android app that demonstrates how to split long ViewModels into
 
 ### Data Source Layer
 - **MediaDataSource** / **MediaDataSourceImpl** - Handles data fetching from assets
-
-## 🎥 Check out our droidcon talk!
-
-For more information, watch our droidcon talk [**"Breaking Up with Big ViewModels — Without Breaking Your Architecture"**](https://berlin.droidcon.com/speakers/stelios-frantzeskakis)
