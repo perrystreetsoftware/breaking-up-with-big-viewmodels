@@ -14,20 +14,22 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.perrystreet.nobigviewmodels.presentation.theme.AppTheme
+import com.perrystreet.nobigviewmodels.navigation.Routes
+import com.perrystreet.nobigviewmodels.presentation.grid.viewmodel.BottomBarViewModel
+import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.getKoin
 
 @Composable
-fun BottomBar(
-    isVisible: Boolean,
-    onFavoriteTap: () -> Unit = {},
-    onShareTap: () -> Unit = {},
-    onStarTap: () -> Unit = {},
-    onDeleteTap: () -> Unit = {},
-) {
+fun BottomBar() {
+    val scope = getKoin().getScope(Routes.GRID)
+    val viewModel: BottomBarViewModel = koinViewModel(scope = scope)
+    val isVisible by viewModel.isVisible.collectAsState(initial = false)
     if (!isVisible) return
+
     BottomAppBar(
         containerColor = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
@@ -39,7 +41,7 @@ fun BottomBar(
                     .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
-            IconButton(onClick = onFavoriteTap) {
+            IconButton(onClick = viewModel::onFavoriteTap) {
                 Icon(
                     imageVector = Icons.Default.Favorite,
                     contentDescription = "Add to favorites",
@@ -47,7 +49,7 @@ fun BottomBar(
                 )
             }
 
-            IconButton(onClick = onShareTap) {
+            IconButton(onClick = viewModel::onShareTap) {
                 Icon(
                     imageVector = Icons.Default.Share,
                     contentDescription = "Share",
@@ -55,7 +57,7 @@ fun BottomBar(
                 )
             }
 
-            IconButton(onClick = onStarTap) {
+            IconButton(onClick = viewModel::onStarTap) {
                 Icon(
                     imageVector = Icons.Default.Star,
                     contentDescription = "Add to starred",
@@ -63,7 +65,7 @@ fun BottomBar(
                 )
             }
 
-            IconButton(onClick = onDeleteTap) {
+            IconButton(onClick = viewModel::onDeleteTap) {
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = "Delete",
@@ -74,10 +76,10 @@ fun BottomBar(
     }
 }
 
-@Preview(showBackground = true, name = "Bottom Bar")
-@Composable
-fun BottomBarPreview() {
-    AppTheme {
-        BottomBar(isVisible = true)
-    }
-}
+//@Preview(showBackground = true, name = "Bottom Bar")
+//@Composable
+//fun BottomBarPreview() {
+//    AppTheme {
+//        BottomBar(isVisible = true)
+//    }
+//}

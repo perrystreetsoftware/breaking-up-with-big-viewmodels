@@ -2,7 +2,6 @@ package com.perrystreet.nobigviewmodels.presentation.grid.ui.components
 
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,25 +14,28 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.perrystreet.nobigviewmodels.presentation.grid.model.GridMediaUiModel
-import com.perrystreet.nobigviewmodels.presentation.grid.model.GridState
-import com.perrystreet.nobigviewmodels.presentation.theme.AppTheme
+import com.perrystreet.nobigviewmodels.navigation.Routes
+import com.perrystreet.nobigviewmodels.presentation.grid.viewmodel.GridViewModel
+import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.getKoin
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun Grid(
-    state: GridState,
     modifier: Modifier = Modifier,
-    onLongTap: (String) -> Unit = {},
-    onMediaTap: (String) -> Unit = {},
+    onMediaTap: (String) -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedVisibilityScope,
 ) {
+    val scope = getKoin().getScope(Routes.GRID)
+    val viewModel: GridViewModel = koinViewModel(scope = scope)
+    val state by viewModel.state.collectAsState()
+
     Surface(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background,
@@ -58,7 +60,7 @@ fun Grid(
                 items(state.media) { media ->
                     MediaItem(
                         media = media,
-                        onLongTap = onLongTap,
+                        onLongTap = viewModel::onMediaLongTap,
                         onMediaTap = onMediaTap,
                         sharedTransitionScope = sharedTransitionScope,
                         animatedContentScope = animatedContentScope,
@@ -69,81 +71,81 @@ fun Grid(
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
-@Preview(showBackground = true, name = "With Media")
-@Composable
-fun GalleryContentWithMediaPreview() {
-    AppTheme {
-        SharedTransitionLayout {
-            androidx.compose.animation.AnimatedVisibility(visible = true) {
-                Grid(
-                    state =
-                        GridState(
-                            media =
-                                listOf(
-                                    GridMediaUiModel(
-                                        id = "1",
-                                        title = "Beautiful Landscape",
-                                        thumbnailUrl = "",
-                                        imageUrl = "",
-                                        formattedDate = "Sep 15, 2025",
-                                        typeIcon = "📷",
-                                        typeColor =
-                                            Color(0xFF4CAF50),
-                                    ),
-                                    GridMediaUiModel(
-                                        id = "2",
-                                        title = "City View",
-                                        thumbnailUrl = "",
-                                        imageUrl = "",
-                                        formattedDate = "Sep 14, 2025",
-                                        typeIcon = "🎥",
-                                        typeColor =
-                                            Color(0xFF2196F3),
-                                    ),
-                                    GridMediaUiModel(
-                                        id = "3",
-                                        title = "Nature Scene",
-                                        thumbnailUrl = "",
-                                        imageUrl = "",
-                                        formattedDate = "Sep 13, 2025",
-                                        typeIcon = "🎞️",
-                                        typeColor =
-                                            Color(0xFFFF9800),
-                                    ),
-                                    GridMediaUiModel(
-                                        id = "4",
-                                        title = "Mountain View",
-                                        thumbnailUrl = "",
-                                        imageUrl = "",
-                                        formattedDate = "Sep 12, 2025",
-                                        typeIcon = "📷",
-                                        typeColor =
-                                            Color(0xFF4CAF50),
-                                    ),
-                                ),
-                        ),
-                    sharedTransitionScope = this@SharedTransitionLayout,
-                    animatedContentScope = this@AnimatedVisibility,
-                )
-            }
-        }
-    }
-}
+//@OptIn(ExperimentalSharedTransitionApi::class)
+//@Preview(showBackground = true, name = "With Media")
+//@Composable
+//fun GalleryContentWithMediaPreview() {
+//    AppTheme {
+//        SharedTransitionLayout {
+//            androidx.compose.animation.AnimatedVisibility(visible = true) {
+//                Grid(
+//                    state =
+//                        GridState(
+//                            media =
+//                                listOf(
+//                                    GridMediaUiModel(
+//                                        id = "1",
+//                                        title = "Beautiful Landscape",
+//                                        thumbnailUrl = "",
+//                                        imageUrl = "",
+//                                        formattedDate = "Sep 15, 2025",
+//                                        typeIcon = "📷",
+//                                        typeColor =
+//                                            Color(0xFF4CAF50),
+//                                    ),
+//                                    GridMediaUiModel(
+//                                        id = "2",
+//                                        title = "City View",
+//                                        thumbnailUrl = "",
+//                                        imageUrl = "",
+//                                        formattedDate = "Sep 14, 2025",
+//                                        typeIcon = "🎥",
+//                                        typeColor =
+//                                            Color(0xFF2196F3),
+//                                    ),
+//                                    GridMediaUiModel(
+//                                        id = "3",
+//                                        title = "Nature Scene",
+//                                        thumbnailUrl = "",
+//                                        imageUrl = "",
+//                                        formattedDate = "Sep 13, 2025",
+//                                        typeIcon = "🎞️",
+//                                        typeColor =
+//                                            Color(0xFFFF9800),
+//                                    ),
+//                                    GridMediaUiModel(
+//                                        id = "4",
+//                                        title = "Mountain View",
+//                                        thumbnailUrl = "",
+//                                        imageUrl = "",
+//                                        formattedDate = "Sep 12, 2025",
+//                                        typeIcon = "📷",
+//                                        typeColor =
+//                                            Color(0xFF4CAF50),
+//                                    ),
+//                                ),
+//                        ),
+//                    sharedTransitionScope = this@SharedTransitionLayout,
+//                    animatedContentScope = this@AnimatedVisibility,
+//                )
+//            }
+//        }
+//    }
+//}
 
-@OptIn(ExperimentalSharedTransitionApi::class)
-@Preview(showBackground = true, name = "Loading State")
-@Composable
-fun GalleryContentLoadingPreview() {
-    AppTheme {
-        SharedTransitionLayout {
-            androidx.compose.animation.AnimatedVisibility(visible = true) {
-                Grid(
-                    state = GridState(media = emptyList()),
-                    sharedTransitionScope = this@SharedTransitionLayout,
-                    animatedContentScope = this@AnimatedVisibility,
-                )
-            }
-        }
-    }
-}
+//@OptIn(ExperimentalSharedTransitionApi::class)
+//@Preview(showBackground = true, name = "Loading State")
+//@Composable
+//fun GalleryContentLoadingPreview() {
+//    AppTheme {
+//        SharedTransitionLayout {
+//            androidx.compose.animation.AnimatedVisibility(visible = true) {
+//                Grid(
+//                    state = GridState(media = emptyList()),
+//                    sharedTransitionScope = this@SharedTransitionLayout,
+//                    animatedContentScope = this@AnimatedVisibility,
+//                )
+//            }
+//        }
+//    }
+//}

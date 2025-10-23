@@ -22,9 +22,8 @@ fun AppNavHost() {
             startDestination = Routes.GRID,
         ) {
             composable(Routes.GRID) {
-                KoinScopedComposable(scopeName = Routes.GRID) { scope ->
+                KoinScopedComposable(scopeName = Routes.GRID) {
                     GridScreen(
-                        scope = scope,
                         onMediaTap = { mediaId ->
                             navController.navigate(Routes.mediaDetail(mediaId))
                         },
