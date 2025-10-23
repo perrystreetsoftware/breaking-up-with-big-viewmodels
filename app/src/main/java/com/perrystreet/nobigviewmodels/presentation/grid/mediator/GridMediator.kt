@@ -96,6 +96,20 @@ class GridMediator {
         }
 }
 
+// TODO generate with KSP
+//@ReducerAction
+//fun reduce(
+//    state: GridState,
+//    action: GridAction.MediaLoaded,
+//) {
+//    _state.value =
+//        state.copy(
+//            media = action.media,
+//            isLoading = false,
+//            error = null,
+//        )
+//}
+
 /** Hilt equivalent */
 /*
 class GridMediator {

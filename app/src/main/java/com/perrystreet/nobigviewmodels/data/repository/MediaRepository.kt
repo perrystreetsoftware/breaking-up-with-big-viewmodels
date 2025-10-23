@@ -32,3 +32,8 @@ class MediaRepository(
         _cachedMedia.value = updatedList
     }
 }
+
+//data sealed class Result<out T> {
+//    data class moments<T>(val data: T) : Result<T>()
+//    data class Error(val exception: Throwable) : Result<Nothing>()
+//}
