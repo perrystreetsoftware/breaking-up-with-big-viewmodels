@@ -24,6 +24,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -39,6 +40,7 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.perrystreet.nobigviewmodels.presentation.detail.viewmodel.MediaDetailViewModel
 import com.perrystreet.nobigviewmodels.presentation.theme.AppTheme
+import kotlinx.coroutines.rx3.asFlow
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -51,7 +53,12 @@ fun MediaDetailScreen(
     animatedContentScope: AnimatedVisibilityScope,
 ) {
     val viewModel: MediaDetailViewModel = koinViewModel { parametersOf(mediaId) }
-    val media by viewModel.media.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.onViewAppear()
+    }
+
+    val media by viewModel.state.asFlow().collectAsState(initial = null)
 
     AppTheme {
         Scaffold(

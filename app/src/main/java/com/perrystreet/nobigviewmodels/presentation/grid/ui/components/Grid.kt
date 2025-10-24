@@ -14,13 +14,16 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.perrystreet.nobigviewmodels.navigation.Routes
+import com.perrystreet.nobigviewmodels.presentation.grid.model.GridState
 import com.perrystreet.nobigviewmodels.presentation.grid.viewmodel.GridViewModel
+import kotlinx.coroutines.rx3.asFlow
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.getKoin
 
@@ -34,7 +37,12 @@ fun Grid(
 ) {
     val scope = getKoin().getScope(Routes.GRID)
     val viewModel: GridViewModel = koinViewModel(scope = scope)
-    val state by viewModel.state.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.onViewAppear()
+    }
+
+    val state by viewModel.state.asFlow().collectAsState(initial = GridState(emptyList()))
 
     Surface(
         modifier = modifier.fillMaxSize(),

@@ -14,12 +14,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.perrystreet.nobigviewmodels.navigation.Routes
 import com.perrystreet.nobigviewmodels.presentation.grid.viewmodel.BottomBarViewModel
+import kotlinx.coroutines.rx3.asFlow
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.getKoin
 
@@ -27,7 +29,12 @@ import org.koin.compose.getKoin
 fun BottomBar() {
     val scope = getKoin().getScope(Routes.GRID)
     val viewModel: BottomBarViewModel = koinViewModel(scope = scope)
-    val isVisible by viewModel.isVisible.collectAsState(initial = false)
+
+    LaunchedEffect(Unit) {
+        viewModel.onViewAppear()
+    }
+
+    val isVisible by viewModel.state.asFlow().collectAsState(initial = false)
     if (!isVisible) return
 
     BottomAppBar(

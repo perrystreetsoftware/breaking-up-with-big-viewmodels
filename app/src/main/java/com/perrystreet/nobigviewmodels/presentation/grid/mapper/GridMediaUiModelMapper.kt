@@ -4,14 +4,16 @@ import android.annotation.SuppressLint
 import androidx.compose.ui.graphics.Color
 import com.perrystreet.nobigviewmodels.domain.model.Media
 import com.perrystreet.nobigviewmodels.presentation.grid.model.GridMediaUiModel
+import org.koin.core.annotation.Factory
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-object GridMediaUiModelMapper {
+@Factory
+class GridMediaUiModelMapper() {
     @SuppressLint("ConstantLocale")
     private val dateFormatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
 
-    fun fromMediaList(mediaList: List<Media>): List<GridMediaUiModel> =
+    operator fun invoke(mediaList: List<Media>): List<GridMediaUiModel> =
         mediaList.map { media ->
             GridMediaUiModel(
                 id = media.id,

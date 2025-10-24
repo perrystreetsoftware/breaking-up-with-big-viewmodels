@@ -2,38 +2,20 @@ package com.perrystreet.nobigviewmodels.data.repository
 
 import com.perrystreet.nobigviewmodels.data.datasource.MediaDataSource
 import com.perrystreet.nobigviewmodels.domain.model.Media
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.onStart
+import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Observable
 import org.koin.core.annotation.Single
 
 @Single
 class MediaRepository(
     private val mediaDataSource: MediaDataSource,
 ) {
-    private val _cachedMedia = MutableStateFlow<List<Media>>(emptyList())
+    fun getMediaList(): Observable<List<Media>> = mediaDataSource.getMediaList()
 
-    fun getMediaList(): Flow<List<Media>> =
-        _cachedMedia.onStart {
-            if (_cachedMedia.value.isEmpty()) {
-                val mediaList = mediaDataSource.getMediaList()
-                _cachedMedia.value = mediaList
-            }
-        }
-
-    suspend fun deleteMedia(mediaIds: List<String>) {
-        delay(1000) // Simulate network request
-
-        val updatedList =
-            _cachedMedia.value.filter { media ->
-                !mediaIds.contains(media.id)
-            }
-        _cachedMedia.value = updatedList
-    }
+    fun deleteMedia(mediaIds: List<String>): Completable = Completable.complete()
 }
 
-//data sealed class Result<out T> {
+// data sealed class Result<out T> {
 //    data class moments<T>(val data: T) : Result<T>()
 //    data class Error(val exception: Throwable) : Result<Nothing>()
-//}
+// }

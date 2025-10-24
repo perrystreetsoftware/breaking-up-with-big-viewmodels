@@ -1,38 +1,38 @@
 package com.perrystreet.nobigviewmodels.presentation.grid.viewmodel
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import com.perrystreet.nobigviewmodels.data.datasource.ISchedulerProvider
 import com.perrystreet.nobigviewmodels.domain.usecase.GetMediaUseCase
+import com.perrystreet.nobigviewmodels.presentation.base.BaseLifecycleViewModel
 import com.perrystreet.nobigviewmodels.presentation.grid.mapper.GridMediaUiModelMapper
 import com.perrystreet.nobigviewmodels.presentation.grid.mediator.GridAction
 import com.perrystreet.nobigviewmodels.presentation.grid.mediator.GridMediator
 import com.perrystreet.nobigviewmodels.presentation.grid.model.GridState
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.kotlin.plusAssign
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
 class GridViewModel(
     private val getMediaUseCase: GetMediaUseCase,
     private val gridMediator: GridMediator,
-) : ViewModel() {
-    val state: StateFlow<GridState> = gridMediator.state
+    private val gridMediaUiModelMapper: GridMediaUiModelMapper,
+    private val schedulerProvider: ISchedulerProvider,
+) : BaseLifecycleViewModel() {
+    val state: Observable<GridState> = gridMediator.state
 
-    init {
+    override fun onFirstAppear() {
         loadMedia()
     }
 
     private fun loadMedia() {
-        viewModelScope.launch(Dispatchers.Main) {
+        disposables +=
             getMediaUseCase()
-                .map {
-                    GridMediaUiModelMapper.fromMediaList(it)
-                }.collect { uiModels ->
+                .map { gridMediaUiModelMapper(it) }
+                .subscribeOn(schedulerProvider.ioScheduler)
+                .observeOn(schedulerProvider.mainScheduler)
+                .subscribe { uiModels ->
                     gridMediator.dispatch(GridAction.MediaLoaded(uiModels))
                 }
-        }
     }
 
     fun onMediaLongTap(mediaId: String) {

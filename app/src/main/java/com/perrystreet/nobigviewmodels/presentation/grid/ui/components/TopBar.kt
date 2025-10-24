@@ -12,6 +12,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import com.perrystreet.nobigviewmodels.navigation.Routes
 import com.perrystreet.nobigviewmodels.presentation.grid.model.TopBarState
 import com.perrystreet.nobigviewmodels.presentation.grid.viewmodel.TopBarViewModel
+import kotlinx.coroutines.rx3.asFlow
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.getKoin
 
@@ -30,7 +32,12 @@ import org.koin.compose.getKoin
 fun TopBar(albumName: String = "Camera") {
     val scope = getKoin().getScope(Routes.GRID)
     val viewModel: TopBarViewModel = koinViewModel(scope = scope)
-    val state by viewModel.state.collectAsState(initial = TopBarState())
+
+    LaunchedEffect(Unit) {
+        viewModel.onViewAppear()
+    }
+
+    val state by viewModel.state.asFlow().collectAsState(initial = TopBarState())
     var showMenu by remember { mutableStateOf(false) }
 
     TopAppBar(

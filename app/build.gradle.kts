@@ -69,6 +69,11 @@ dependencies {
     implementation(libs.koin.annotations)
     implementation(libs.coil.compose)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.rxjava3)
+    implementation(libs.rxandroid)
+    implementation(libs.rxjava3.bridge)
+    implementation(libs.rxkotlin)
+    implementation(libs.kotlinx.coroutines.rx3)
 
     /** Hilt */
     // implementation(libs.hilt.android)
