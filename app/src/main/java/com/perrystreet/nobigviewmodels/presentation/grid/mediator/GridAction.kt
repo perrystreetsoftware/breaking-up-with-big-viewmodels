@@ -87,6 +87,24 @@ sealed interface GridAction {
         }
     }
 
+    data object MediaUploading : GridAction {
+        override fun reduce(state: GridState): GridState =
+            state.copy(
+                isLoading = true,
+                error = null,
+            )
+    }
+
+    data class UploadFailed(
+        val error: String,
+    ) : GridAction {
+        override fun reduce(state: GridState): GridState =
+            state.copy(
+                isLoading = false,
+                error = error,
+            )
+    }
+
     data object ClearError : GridAction {
         override fun reduce(state: GridState): GridState = state.copy(error = null)
     }

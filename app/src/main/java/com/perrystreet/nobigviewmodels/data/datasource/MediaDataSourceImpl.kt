@@ -1,14 +1,17 @@
 package com.perrystreet.nobigviewmodels.data.datasource
 
 import com.perrystreet.nobigviewmodels.domain.model.Media
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.subjects.BehaviorSubject
 import org.koin.core.annotation.Factory
 import java.util.Date
+import java.util.concurrent.TimeUnit
 
 @Factory
 class MediaDataSourceImpl : MediaDataSource {
-    override fun getMediaList(): Observable<List<Media>> =
-        Observable.just(
+    private val mediaListSubject =
+        BehaviorSubject.createDefault(
             listOf(
                 Media(
                     id = "1",
@@ -76,4 +79,19 @@ class MediaDataSourceImpl : MediaDataSource {
                 ),
             ),
         )
+
+    override fun getMediaList(): Observable<List<Media>> = mediaListSubject.hide()
+
+    override fun uploadMedia(filePath: String) = Completable.complete()
+
+    override fun deleteMedia(mediaIds: List<String>): Completable =
+        Completable
+            .timer(2, TimeUnit.SECONDS)
+            .andThen(
+                Completable.fromAction {
+                    val currentList = mediaListSubject.value ?: emptyList()
+                    val updatedList = currentList.filter { it.id !in mediaIds }
+                    mediaListSubject.onNext(updatedList)
+                },
+            )
 }

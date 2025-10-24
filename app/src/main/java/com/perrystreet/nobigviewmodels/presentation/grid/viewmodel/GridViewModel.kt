@@ -2,6 +2,7 @@ package com.perrystreet.nobigviewmodels.presentation.grid.viewmodel
 
 import com.perrystreet.nobigviewmodels.data.datasource.ISchedulerProvider
 import com.perrystreet.nobigviewmodels.domain.usecase.GetMediaUseCase
+import com.perrystreet.nobigviewmodels.domain.usecase.UploadMediaUseCase
 import com.perrystreet.nobigviewmodels.presentation.base.BaseLifecycleViewModel
 import com.perrystreet.nobigviewmodels.presentation.grid.mapper.GridMediaUiModelMapper
 import com.perrystreet.nobigviewmodels.presentation.grid.mediator.GridAction
@@ -14,6 +15,7 @@ import org.koin.android.annotation.KoinViewModel
 @KoinViewModel
 class GridViewModel(
     private val getMediaUseCase: GetMediaUseCase,
+    private val uploadMediaUseCase: UploadMediaUseCase,
     private val gridMediator: GridMediator,
     private val gridMediaUiModelMapper: GridMediaUiModelMapper,
     private val schedulerProvider: ISchedulerProvider,
@@ -28,8 +30,6 @@ class GridViewModel(
         disposables +=
             getMediaUseCase()
                 .map { gridMediaUiModelMapper(it) }
-                .subscribeOn(schedulerProvider.ioScheduler)
-                .observeOn(schedulerProvider.mainScheduler)
                 .subscribe { uiModels ->
                     gridMediator.dispatch(GridAction.MediaLoaded(uiModels))
                 }
@@ -37,6 +37,20 @@ class GridViewModel(
 
     fun onMediaLongTap(mediaId: String) {
         gridMediator.dispatch(GridAction.ToggleSelection(mediaId))
+    }
+
+    fun onMediaUpload(filePath: String) {
+        disposables +=
+            uploadMediaUseCase(filePath)
+                .doOnSubscribe {
+                    gridMediator.dispatch(GridAction.MediaUploading)
+                }.subscribe(
+                    { },
+                    { error ->
+                        val errorMessage = error.message ?: "Failed to upload media"
+                        gridMediator.dispatch(GridAction.UploadFailed(errorMessage))
+                    },
+                )
     }
 }
 
