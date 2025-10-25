@@ -2,6 +2,8 @@ package com.perrystreet.nobigviewmodels.data.repository
 
 import com.perrystreet.nobigviewmodels.data.datasource.MediaDataSource
 import com.perrystreet.nobigviewmodels.domain.model.Media
+import com.perrystreet.nobigviewmodels.utils.Optional
+import com.perrystreet.nobigviewmodels.utils.asOptional
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.plusAssign
@@ -13,7 +15,7 @@ class MediaRepository(
 ) {
     data class State(
         val mediaList: List<Media> = emptyList(),
-        val error: Throwable? = null,
+        val error: Optional<Throwable> = Optional.empty(),
     )
 
     private val _state = BehaviorSubject.createDefault<State>(State())
@@ -30,7 +32,7 @@ class MediaRepository(
                         updateState { it.copy(mediaList = mediaList) }
                     },
                     { error ->
-                        updateState { it.copy(error = error) }
+                        updateState { it.copy(error = error.asOptional()) }
                     },
                 )
     }
@@ -47,7 +49,7 @@ class MediaRepository(
                         }
                     },
                     { error ->
-                        updateState { it.copy(error = error) }
+                        updateState { it.copy(error = error.asOptional()) }
                     },
                 )
     }
@@ -70,9 +72,13 @@ class MediaRepository(
                         }
                     },
                     { error ->
-                        updateState { it.copy(error = error) }
+                        updateState { it.copy(error = error.asOptional()) }
                     },
                 )
+    }
+
+    fun clearError() {
+        updateState { it.copy(error = Optional.empty()) }
     }
 
     private fun updateState(transform: (State) -> State) {

@@ -2,6 +2,7 @@ package com.perrystreet.nobigviewmodels.presentation.grid.mediator
 
 import com.perrystreet.nobigviewmodels.presentation.grid.model.GridMediaUiModel
 import com.perrystreet.nobigviewmodels.presentation.grid.model.GridState
+import com.perrystreet.nobigviewmodels.utils.Optional
 
 sealed interface GridAction {
     fun reduce(state: GridState): GridState
@@ -13,7 +14,15 @@ sealed interface GridAction {
             state.copy(
                 media = media,
                 isLoading = false,
-                error = null,
+            )
+    }
+
+    data class MediaError(
+        val error: Optional<Throwable>,
+    ) : GridAction {
+        override fun reduce(state: GridState): GridState =
+            state.copy(
+                error = error,
             )
     }
 
@@ -22,7 +31,6 @@ sealed interface GridAction {
             state.copy(
                 media = emptyList(),
                 isLoading = true,
-                error = null,
             )
     }
 
@@ -42,60 +50,10 @@ sealed interface GridAction {
         }
     }
 
-    data object ClearSelections : GridAction {
-        override fun reduce(state: GridState): GridState {
-            val updatedMedia = state.media.map { it.copy(selected = false) }
-            return state.copy(media = updatedMedia)
-        }
-    }
-
-    data class SelectMultiple(
-        val mediaIds: List<String>,
-    ) : GridAction {
-        override fun reduce(state: GridState): GridState {
-            val updatedMedia =
-                state.media.map { media ->
-                    if (mediaIds.contains(media.id)) {
-                        media.copy(selected = true)
-                    } else {
-                        media
-                    }
-                }
-            return state.copy(media = updatedMedia)
-        }
-    }
-
-    data class DeleteFailed(
-        val error: String,
-    ) : GridAction {
-        override fun reduce(state: GridState): GridState {
-            val updatedMedia = state.media.map { it.copy(isLoading = false) }
-            return state.copy(
-                media = updatedMedia,
-                error = error,
-            )
-        }
-    }
-
     data object MediaUploading : GridAction {
         override fun reduce(state: GridState): GridState =
             state.copy(
                 isLoading = true,
-                error = null,
             )
-    }
-
-    data class UploadFailed(
-        val error: String,
-    ) : GridAction {
-        override fun reduce(state: GridState): GridState =
-            state.copy(
-                isLoading = false,
-                error = error,
-            )
-    }
-
-    data object ClearError : GridAction {
-        override fun reduce(state: GridState): GridState = state.copy(error = null)
     }
 }

@@ -1,5 +1,7 @@
 package com.perrystreet.nobigviewmodels.presentation.grid.viewmodel
 
+import com.perrystreet.nobigviewmodels.domain.usecase.ClearMediaErrorUseCase
+import com.perrystreet.nobigviewmodels.domain.usecase.GetMediaErrorUseCase
 import com.perrystreet.nobigviewmodels.domain.usecase.GetMediaUseCase
 import com.perrystreet.nobigviewmodels.domain.usecase.LoadMediaUseCase
 import com.perrystreet.nobigviewmodels.domain.usecase.UploadMediaUseCase
@@ -17,6 +19,8 @@ class GridViewModel(
     private val getMediaUseCase: GetMediaUseCase,
     private val loadMediaUseCase: LoadMediaUseCase,
     private val uploadMediaUseCase: UploadMediaUseCase,
+    private val getMediaErrorUseCase: GetMediaErrorUseCase,
+    private val clearMediaErrorUseCase: ClearMediaErrorUseCase,
     private val gridMediator: GridMediator,
     private val gridMediaUiModelMapper: GridMediaUiModelMapper,
 ) : BaseLifecycleViewModel() {
@@ -24,6 +28,7 @@ class GridViewModel(
 
     override fun onFirstAppear() {
         listenToMedia()
+        listenToMediaErrors()
         loadMediaUseCase()
     }
 
@@ -38,6 +43,14 @@ class GridViewModel(
                 }
     }
 
+    private fun listenToMediaErrors() {
+        disposables +=
+            getMediaErrorUseCase()
+                .subscribe { error ->
+                    gridMediator.dispatch(GridAction.MediaError(error))
+                }
+    }
+
     fun onMediaLongTap(mediaId: String) {
         gridMediator.dispatch(GridAction.ToggleSelection(mediaId))
     }
@@ -45,6 +58,11 @@ class GridViewModel(
     fun onMediaUpload(filePath: String) {
         gridMediator.dispatch(GridAction.MediaUploading)
         uploadMediaUseCase(filePath)
+    }
+
+    // View layer will call this to clear the error
+    fun onErrorDismiss() {
+        clearMediaErrorUseCase()
     }
 }
 
