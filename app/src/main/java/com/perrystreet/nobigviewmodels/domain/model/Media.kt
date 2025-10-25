@@ -9,6 +9,7 @@ data class Media(
     val thumbnailUrl: String,
     val date: Date,
     val type: Type,
+    val isPending: Boolean,
 ) {
     enum class Type {
         Photo,

@@ -45,9 +45,6 @@ fun GridScreen(
     }
 }
 
-// TODO do we want to move previews to the test folder?
-// TODO or can we at least re-use the testFixtures
-
 @SuppressLint("UnusedContentLambdaTargetStateParameter")
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Preview(showBackground = true)

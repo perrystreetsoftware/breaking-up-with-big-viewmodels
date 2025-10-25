@@ -1,4 +1,4 @@
-package com.perrystreet.nobigviewmodels.data.datasource
+package com.perrystreet.nobigviewmodels.utils
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Scheduler

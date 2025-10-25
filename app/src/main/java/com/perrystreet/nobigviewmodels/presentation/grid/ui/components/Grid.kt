@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.perrystreet.nobigviewmodels.navigation.Routes
 import com.perrystreet.nobigviewmodels.presentation.grid.model.GridState
 import com.perrystreet.nobigviewmodels.presentation.grid.viewmodel.GridViewModel
+import com.perrystreet.nobigviewmodels.utils.guard
 import kotlinx.coroutines.rx3.asFlow
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.getKoin
@@ -48,14 +49,7 @@ fun Grid(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background,
     ) {
-        if (state.media.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator()
-            }
-        } else {
+        Box(modifier = Modifier.fillMaxSize()) {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 modifier =
@@ -75,14 +69,28 @@ fun Grid(
                     )
                 }
             }
+
+            LoadingIndicator(state)
         }
     }
 }
 
-//@OptIn(ExperimentalSharedTransitionApi::class)
-//@Preview(showBackground = true, name = "With Media")
-//@Composable
-//fun GalleryContentWithMediaPreview() {
+@Composable
+private fun LoadingIndicator(state: GridState) {
+    guard(state.isLoading) { return }
+
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        CircularProgressIndicator()
+    }
+}
+
+// @OptIn(ExperimentalSharedTransitionApi::class)
+// @Preview(showBackground = true, name = "With Media")
+// @Composable
+// fun GalleryContentWithMediaPreview() {
 //    AppTheme {
 //        SharedTransitionLayout {
 //            androidx.compose.animation.AnimatedVisibility(visible = true) {
@@ -139,12 +147,12 @@ fun Grid(
 //            }
 //        }
 //    }
-//}
+// }
 
-//@OptIn(ExperimentalSharedTransitionApi::class)
-//@Preview(showBackground = true, name = "Loading State")
-//@Composable
-//fun GalleryContentLoadingPreview() {
+// @OptIn(ExperimentalSharedTransitionApi::class)
+// @Preview(showBackground = true, name = "Loading State")
+// @Composable
+// fun GalleryContentLoadingPreview() {
 //    AppTheme {
 //        SharedTransitionLayout {
 //            androidx.compose.animation.AnimatedVisibility(visible = true) {
@@ -156,4 +164,4 @@ fun Grid(
 //            }
 //        }
 //    }
-//}
+// }

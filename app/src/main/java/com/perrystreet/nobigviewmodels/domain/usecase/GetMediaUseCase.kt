@@ -10,8 +10,9 @@ class GetMediaUseCase(
     private val mediaRepository: MediaRepository,
 ) {
     operator fun invoke(): Observable<List<Media>> =
-        mediaRepository
-            .getMediaList()
+        mediaRepository.state
+            .map { it.mediaList }
+            .filter { it.isNotEmpty() }
             .map { mediaList ->
                 mediaList.sortedByDescending { it.date.time }
             }

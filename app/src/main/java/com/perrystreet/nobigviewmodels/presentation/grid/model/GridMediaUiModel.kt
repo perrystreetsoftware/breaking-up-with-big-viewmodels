@@ -11,5 +11,5 @@ data class GridMediaUiModel(
     val typeIcon: String,
     val typeColor: Color,
     val selected: Boolean = false,
-    val isDeleting: Boolean = false,
+    val isLoading: Boolean = false,
 )

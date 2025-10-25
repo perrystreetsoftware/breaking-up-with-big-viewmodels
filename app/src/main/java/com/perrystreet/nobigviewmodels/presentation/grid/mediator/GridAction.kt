@@ -17,6 +17,15 @@ sealed interface GridAction {
             )
     }
 
+    data object MediaLoading : GridAction {
+        override fun reduce(state: GridState): GridState =
+            state.copy(
+                media = emptyList(),
+                isLoading = true,
+                error = null,
+            )
+    }
+
     data class ToggleSelection(
         val mediaId: String,
     ) : GridAction {
@@ -56,30 +65,11 @@ sealed interface GridAction {
         }
     }
 
-    data class DeletingMedia(
-        val mediaIds: List<String>,
-    ) : GridAction {
-        override fun reduce(state: GridState): GridState {
-            val updatedMedia =
-                state.media.map { media ->
-                    if (mediaIds.contains(media.id)) {
-                        media.copy(isDeleting = true)
-                    } else {
-                        media
-                    }
-                }
-            return state.copy(
-                media = updatedMedia,
-                error = null,
-            )
-        }
-    }
-
     data class DeleteFailed(
         val error: String,
     ) : GridAction {
         override fun reduce(state: GridState): GridState {
-            val updatedMedia = state.media.map { it.copy(isDeleting = false) }
+            val updatedMedia = state.media.map { it.copy(isLoading = false) }
             return state.copy(
                 media = updatedMedia,
                 error = error,

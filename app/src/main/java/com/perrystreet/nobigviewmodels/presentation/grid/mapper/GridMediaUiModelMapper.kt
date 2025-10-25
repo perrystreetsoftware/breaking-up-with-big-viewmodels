@@ -9,7 +9,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 @Factory
-class GridMediaUiModelMapper() {
+class GridMediaUiModelMapper {
     @SuppressLint("ConstantLocale")
     private val dateFormatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
 
@@ -33,6 +33,7 @@ class GridMediaUiModelMapper() {
                         Media.Type.Video -> Color(0xFF2196F3)
                         Media.Type.Gif -> Color(0xFFFF9800)
                     },
+                isLoading = media.isPending,
             )
         }
 }

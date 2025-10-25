@@ -2,7 +2,6 @@ package com.perrystreet.nobigviewmodels.presentation.grid.viewmodel
 
 import com.perrystreet.nobigviewmodels.domain.usecase.DeleteMediaUseCase
 import com.perrystreet.nobigviewmodels.presentation.base.BaseLifecycleViewModel
-import com.perrystreet.nobigviewmodels.presentation.grid.mediator.GridAction
 import com.perrystreet.nobigviewmodels.presentation.grid.mediator.GridMediator
 import com.perrystreet.nobigviewmodels.presentation.grid.model.TopBarState
 import io.reactivex.rxjava3.core.Observable
@@ -16,7 +15,7 @@ class TopBarViewModel(
 ) : BaseLifecycleViewModel() {
     val state: Observable<TopBarState> =
         gridMediator.state.map { gridState ->
-            val isDeletingMedia = gridState.media.any { it.isDeleting }
+            val isDeletingMedia = gridState.media.any { it.isLoading }
             val isAnyItemSelected = gridState.media.any { it.selected }
 
             TopBarState(
@@ -29,22 +28,15 @@ class TopBarViewModel(
     fun onDeleteTap() {
         disposables +=
             gridMediator.state
-                .take(1)
-                .map { gridState ->
-                    gridState.media
-                        .filter { it.selected }
-                        .map { it.id }
-                }.doOnNext { selectedIds ->
-                    gridMediator.dispatch(GridAction.DeletingMedia(selectedIds))
-                }.flatMapCompletable { selectedIds ->
+                .firstOrError()
+                .subscribe { gridState ->
+                    val selectedIds =
+                        gridState.media
+                            .filter { it.selected }
+                            .map { it.id }
+
                     deleteMediaUseCase(selectedIds)
-                }.subscribe(
-                    {},
-                    { error ->
-                        val errorMessage = error.message ?: "Failed to delete media"
-                        gridMediator.dispatch(GridAction.DeleteFailed(errorMessage))
-                    },
-                )
+                }
     }
 }
 

@@ -1,7 +1,7 @@
 package com.perrystreet.nobigviewmodels.presentation.grid.viewmodel
 
-import com.perrystreet.nobigviewmodels.data.datasource.ISchedulerProvider
 import com.perrystreet.nobigviewmodels.domain.usecase.GetMediaUseCase
+import com.perrystreet.nobigviewmodels.domain.usecase.LoadMediaUseCase
 import com.perrystreet.nobigviewmodels.domain.usecase.UploadMediaUseCase
 import com.perrystreet.nobigviewmodels.presentation.base.BaseLifecycleViewModel
 import com.perrystreet.nobigviewmodels.presentation.grid.mapper.GridMediaUiModelMapper
@@ -15,22 +15,25 @@ import org.koin.android.annotation.KoinViewModel
 @KoinViewModel
 class GridViewModel(
     private val getMediaUseCase: GetMediaUseCase,
+    private val loadMediaUseCase: LoadMediaUseCase,
     private val uploadMediaUseCase: UploadMediaUseCase,
     private val gridMediator: GridMediator,
     private val gridMediaUiModelMapper: GridMediaUiModelMapper,
-    private val schedulerProvider: ISchedulerProvider,
 ) : BaseLifecycleViewModel() {
     val state: Observable<GridState> = gridMediator.state
 
     override fun onFirstAppear() {
-        loadMedia()
+        listenToMedia()
+        loadMediaUseCase()
     }
 
-    private fun loadMedia() {
+    private fun listenToMedia() {
         disposables +=
             getMediaUseCase()
                 .map { gridMediaUiModelMapper(it) }
-                .subscribe { uiModels ->
+                .doOnSubscribe {
+                    gridMediator.dispatch(GridAction.MediaLoading)
+                }.subscribe { uiModels ->
                     gridMediator.dispatch(GridAction.MediaLoaded(uiModels))
                 }
     }
@@ -40,17 +43,8 @@ class GridViewModel(
     }
 
     fun onMediaUpload(filePath: String) {
-        disposables +=
-            uploadMediaUseCase(filePath)
-                .doOnSubscribe {
-                    gridMediator.dispatch(GridAction.MediaUploading)
-                }.subscribe(
-                    { },
-                    { error ->
-                        val errorMessage = error.message ?: "Failed to upload media"
-                        gridMediator.dispatch(GridAction.UploadFailed(errorMessage))
-                    },
-                )
+        gridMediator.dispatch(GridAction.MediaUploading)
+        uploadMediaUseCase(filePath)
     }
 }
 

@@ -2,12 +2,12 @@ package com.perrystreet.nobigviewmodels.data.datasource
 
 import com.perrystreet.nobigviewmodels.domain.model.Media
 import io.reactivex.rxjava3.core.Completable
-import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
 
 interface MediaDataSource {
-    fun getMediaList(): Observable<List<Media>>
+    fun getMediaList(): Single<List<Media>>
 
-    fun uploadMedia(filePath: String): Completable
+    fun uploadMedia(filePath: String): Single<Media>
 
     fun deleteMedia(mediaIds: List<String>): Completable
 }

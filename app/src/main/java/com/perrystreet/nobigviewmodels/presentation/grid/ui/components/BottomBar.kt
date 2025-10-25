@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.perrystreet.nobigviewmodels.navigation.Routes
 import com.perrystreet.nobigviewmodels.presentation.grid.viewmodel.BottomBarViewModel
+import com.perrystreet.nobigviewmodels.utils.guard
 import kotlinx.coroutines.rx3.asFlow
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.getKoin
@@ -35,7 +36,7 @@ fun BottomBar() {
     }
 
     val isVisible by viewModel.state.asFlow().collectAsState(initial = false)
-    if (!isVisible) return
+    guard(isVisible) { return }
 
     BottomAppBar(
         containerColor = MaterialTheme.colorScheme.surface,
